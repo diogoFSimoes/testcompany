@@ -42,6 +42,91 @@
     <!-- End Google Tag Manager (noscript) -->
 
     <h1>My TCF CMP v3 Testpage</h1>
+
+    <h2 id="cookieDisplay"><span class="not-found">Loading...</span></h2>
+
+    <script>
+        const cookieNameToFind = "username"; // <<< The name of the cookie you want to read
+        const displayElement = document.getElementById('cookieDisplay');
+        const refreshButton = document.getElementById('refreshCookieBtn');
+
+        /**
+         * Function to retrieve the value of a specific cookie by name.
+         * Reads document.cookie, splits it, finds the matching name,
+         * and returns the decoded value.
+         * @param {string} name - The name of the cookie to find.
+         * @returns {string|null} - The decoded value of the cookie, or null if not found.
+         */
+        function getCookie(name) {
+            // Cookies are stored as: "name1=value1; name2=value2; ..."
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim(); // Remove leading/trailing whitespace
+                // Does this cookie string begin with the name we want?
+                if (cookie.startsWith(name + "=")) {
+                    const cookieValue = cookie.substring(name.length + 1);
+                    // Decode the value (in case it was encoded with encodeURIComponent)
+                    try {
+                        return decodeURIComponent(cookieValue);
+                    } catch (e) {
+                        // Log error if decoding fails, but return raw value
+                        console.error(`Error decoding cookie "${name}":`, e);
+                        return cookieValue;
+                    }
+                }
+            }
+            // Return null if cookie with that name isn't found
+            return null;
+        }
+
+        /**
+         * Function to get the cookie value and update the h2 element's content.
+         */
+        function displayCookieValue() {
+            if (!displayElement) {
+                console.error("Error: Display element with ID 'cookieDisplay' not found.");
+                return;
+            }
+
+            const cookieValue = getCookie(cookieNameToFind);
+
+            if (cookieValue !== null) {
+                // Display the found cookie value inside the h2
+                displayElement.innerHTML = `<span class="label">Cookie "${cookieNameToFind}" Value:</span> <span class="value">${escapeHtml(cookieValue)}</span>`;
+            } else {
+                // Display a message if the cookie wasn't found
+                displayElement.innerHTML = `<span class="not-found">Cookie named "${cookieNameToFind}" was not found.</span>`;
+            }
+        }
+
+        /**
+         * Simple function to escape HTML characters to prevent XSS if displaying user-provided cookie values.
+         */
+        function escapeHtml(unsafe) {
+            if (typeof unsafe !== 'string') return unsafe; // Return non-strings as-is
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+         }
+
+
+        // --- Run when the page content is loaded ---
+        document.addEventListener('DOMContentLoaded', () => {
+            displayCookieValue(); // Display the value initially
+
+            // Set up the refresh button
+            if (refreshButton) {
+                refreshButton.addEventListener('click', displayCookieValue);
+            } else {
+                console.warn("Refresh button with ID 'refreshCookieBtn' not found.");
+            }
+        });
+
+    </script>
+    
     <img src="https://usercentrics.com/wp-content/uploads/2020/04/190208-UCS-Logo-800px.png" alt="uc-logo">
 
     <h1>Test Related Websets</h1>
